@@ -1,6 +1,9 @@
 #ifndef __ANDROID__
 
 #include "OcrPack.h"
+#ifdef ASST_ORT_CUDA_OCR
+#include "Config/OnnxSessions.h"
+#endif
 
 #include <algorithm>
 #include <filesystem>
@@ -198,8 +201,23 @@ bool OcrPack::check_and_load()
     const auto device_id = m_gpu_selector ? m_gpu_selector->resolve_device_id() : std::nullopt;
     if (device_id) {
         m_gpu_active = true;
+#ifdef ASST_ORT_CUDA_OCR
+        const auto providers = Ort::GetAvailableProviders();
+        if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") == providers.end()) {
+            m_gpu_active = false;
+            LogError << "WITH_ORT_CUDA requires an ONNX Runtime build with CUDAExecutionProvider";
+            return false;
+        }
+        // This uses ORT kernels and CPU preprocessing; native FastDeploy CUDA kernels are not required.
+        det_option.device = fastdeploy::Device::CUDA;
+        det_option.device_id = *device_id;
+        rec_option.device = fastdeploy::Device::CUDA;
+        rec_option.device_id = *device_id;
+        LogInfo << "Configured ORT CUDA OCR with CPU preprocessing, device" << *device_id;
+#else
         det_option.UseDirectML(*device_id);
         rec_option.UseDirectML(*device_id);
+#endif
     }
     else {
         m_gpu_active = false;

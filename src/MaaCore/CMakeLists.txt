@@ -17,6 +17,12 @@ if(WITH_MAC_SCK)
 endif()
 
 add_library(MaaCore SHARED ${maa_src})
+if(WITH_ORT_CUDA)
+    if(NOT WIN32)
+        message(FATAL_ERROR "WITH_ORT_CUDA is currently validated on Windows only")
+    endif()
+    set_property(SOURCE Config/Miscellaneous/OcrPack.cpp Config/OnnxSessions.cpp APPEND PROPERTY COMPILE_DEFINITIONS ASST_ORT_CUDA_OCR)
+endif()
 
 if(WITH_EMULATOR_EXTRAS)
     if(EXISTS ${PROJECT_SOURCE_DIR}/3rdparty/EmulatorExtras/Mumu)

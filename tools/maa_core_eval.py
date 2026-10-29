@@ -60,6 +60,7 @@ class CoreEval:
         global_client=None,
         user_dir=None,
         verbose=False,
+        gpu_device=None,
     ):
         self._verbose = verbose
         self._resource = pathlib.Path(resource)
@@ -86,6 +87,11 @@ class CoreEval:
         self._results = []
 
         self._lib.AsstSetUserDir(str(self._user_dir).encode("utf-8"))
+        if gpu_device is not None:
+            if not self._lib.AsstSetStaticOption(2, str(gpu_device).encode("utf-8")):
+                raise RuntimeError(
+                    f"GPU OCR configuration rejected device: {gpu_device}"
+                )
         if not self._lib.AsstLoadResource(str(self._resource).encode("utf-8")):
             raise RuntimeError(f"load resource failed: {resource}")
         self._global_resource = None
@@ -106,6 +112,10 @@ class CoreEval:
         c = ctypes.c_char_p
         lib.AsstSetUserDir.argtypes, lib.AsstSetUserDir.restype = [c], ctypes.c_bool
         lib.AsstLoadResource.argtypes, lib.AsstLoadResource.restype = [c], ctypes.c_bool
+        lib.AsstSetStaticOption.argtypes, lib.AsstSetStaticOption.restype = (
+            [ctypes.c_int, c],
+            ctypes.c_bool,
+        )
         lib.AsstCreateEx.restype = ctypes.c_void_p
         lib.AsstDestroy.argtypes = [ctypes.c_void_p]
         lib.AsstDestroy.restype = None
@@ -412,6 +422,10 @@ def main():
     )
     parser.add_argument("--global", dest="global_client", help="国际服名，如 YoStarJP")
     parser.add_argument("--user-dir", help="core 日志写入目录")
+    parser.add_argument(
+        "--gpu-device",
+        help="Enable GPU OCR before resource loading; use a numeric CUDA ordinal for WITH_ORT_CUDA",
+    )
     parser.add_argument("--verbose", action="store_true", help="打印 core 其余回调消息")
     args = parser.parse_args()
 
@@ -425,6 +439,7 @@ def main():
         global_client=args.global_client,
         user_dir=args.user_dir,
         verbose=args.verbose,
+        gpu_device=args.gpu_device,
     )
     try:
         _run_cli(ev, args)

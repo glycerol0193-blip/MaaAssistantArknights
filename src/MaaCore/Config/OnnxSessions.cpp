@@ -142,6 +142,17 @@ bool asst::OnnxSessions::use_gpu(GpuDeviceSelector selector)
 
 bool asst::OnnxSessions::use_gpu_locked(GpuDeviceSelector selector)
 {
+#ifdef ASST_ORT_CUDA_OCR
+    if (selector.uses_adapter_luid()) {
+        LogError << "WITH_ORT_CUDA requires a numeric CUDA device ordinal; adapter LUID selectors are unsupported";
+        return false;
+    }
+    const auto providers = Ort::GetAvailableProviders();
+    if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") == providers.end()) {
+        LogError << "WITH_ORT_CUDA requires CUDAExecutionProvider";
+        return false;
+    }
+#endif
     if (gpu_enabled) {
         if (m_gpu_selector == selector) {
             return true;
