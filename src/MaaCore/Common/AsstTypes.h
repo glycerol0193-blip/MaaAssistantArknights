@@ -34,15 +34,16 @@ enum class StaticOptionKey
 {
     Invalid = 0,
     CpuOCR = 1, // use CPU to OCR, no value. It does not support switching after the resource is loaded.
-    GpuOCR = 2, // use GPU to OCR. value is a device id integer, or "luid:<hex>" on Windows. It does not support
-                // switching after the resource is loaded.
+    GpuOCR = 2, // use GPU to OCR. value is a device id integer (DirectML on Windows, CPU elsewhere), or
+                // "webgpu:<id>" / "directml:<id>"; "luid:<hex>" is also accepted for DirectML on Windows.
+                // It does not support switching after the resource is loaded.
 };
 
 enum class InstanceOptionKey
 {
     Invalid = 0,
-    /* Deprecated */         // MinitouchEnabled = 1,
-    TouchMode = 2,           // 触控模式设置， "minitouch" | "maatouch" | "adb" | "MaaFwAdb" | "MumuExtras"
+    /* Deprecated */ // MinitouchEnabled = 1,
+    TouchMode = 2,   // 触控模式设置， "minitouch" | "maatouch" | "adb" | "MaaFwAdb" | "MumuExtras" | "ModAvdExtras"
     DeploymentWithPause = 3, // 自动战斗、肉鸽、保全 是否使用 暂停下干员， "0" | "1"
     AdbLiteEnabled = 4,      // 是否使用 AdbLite， "0" | "1"
     KillAdbOnExit = 5,       // 退出时是否杀掉 Adb 进程， "0" | "1"
@@ -58,7 +59,8 @@ enum class TouchMode
     MacPlayTools = 3,
     MaaFwAdb = 4,
     Android = 5,
-    MumuExtras = 6, // MuMu external renderer IPC，不可用时自动降级为 Minitouch
+    MumuExtras = 6,   // MuMu external renderer IPC，不可用时自动降级为 Minitouch
+    ModAvdExtras = 7, // ModAVD 的 modavd_extras 库（宿主侧点击），不可用时自动降级为 MaaTouch
 };
 
 // Swipe 任务 specialParams[1] 的额外滑动方向。json 协议层仍为 int：0 不启用，1/2/3/4 为上/下/左/右

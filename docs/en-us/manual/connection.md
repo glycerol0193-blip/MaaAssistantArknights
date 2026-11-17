@@ -22,10 +22,10 @@ If detection fails, try launching MAA with UAC administrator privileges and dete
 
 ## ADB Path
 
-:::info Technical details
-Auto detection uses the emulator's ADB. Manual configuration is only required if auto detection fails.
-`Force Replace ADB` will download Google's ADB and use it automatically.
-If ADB is available in the environment variables, just fill in `adb`.
+::: info Technical details  
+Auto detection uses the emulator's ADB. Manual configuration is only required if auto detection fails.  
+`Force Replace ADB` will download Google's ADB and use it automatically.  
+If ADB is available in the environment variables, just fill in `adb`.  
 :::
 
 ### Use emulator's ADB
@@ -34,8 +34,8 @@ Go to your emulator's installation directory. On Windows, you can right-click th
 
 Look for an exe file with `adb` in its name in the top-level or subdirectories. You can use search to find it.
 
-:::details Examples
-`adb.exe` `HD-adb.exe` `adb_server.exe` `nox_adb.exe`
+::: details Examples  
+`adb.exe` `HD-adb.exe` `adb_server.exe` `nox_adb.exe`  
 :::
 
 ### Use Google's ADB
@@ -46,8 +46,8 @@ We recommend extracting it directly to the MAA folder so you can enter `.\platfo
 
 ## Connection Address
 
-::: tip
-Emulators running on your local machine should use addresses like `127.0.0.1:<port number>` or `emulator-<four digits>`.
+::: tip  
+Emulators running on your local machine should use addresses like `127.0.0.1:<port number>` or `emulator-<four digits>`.  
 :::
 
 ### Emulator documentation and reference addresses
@@ -103,13 +103,13 @@ This should work in most cases. If connection still fails, you may have multiple
 
 #### Specifying `ConfigKeyword`
 
-::: info Note
-If you're using multi-instance or have multiple emulator cores installed, you'll need additional settings to specify which emulator number to use
+::: info Note  
+If you're using multi-instance or have multiple emulator cores installed, you'll need additional settings to specify which emulator number to use  
 :::
 
 In `gui.new.json`, find your current configuration name (viewable in Settings-Switch Configuration, default is `Default`) and locate the `Gui.ConnectSettings.Extras.BluestacksExtra.ConfigKeyword` field containing `"bst.instance.<emulator number>.status.adb_port"`. Find the emulator number in the `BlueStacks_nxt\Engine` folder in the emulator path.
 
-::: details Examples
+::: details Examples  
 Nougat64 core:
 
 ```json
@@ -126,8 +126,8 @@ Pie64_2 core: (the number after the core name indicates a multi-instance core)
 
 #### Specifying `ConfigPath`
 
-::: info Note
-MAA now attempts to read the `bluestacks.conf` storage location from the registry. When this fails, you need to manually specify the configuration file path
+::: info Note  
+MAA now attempts to read the `bluestacks.conf` storage location from the registry. When this fails, you need to manually specify the configuration file path  
 :::
 
 1. Find the `bluestacks.conf` file in the BlueStacks data directory
@@ -140,7 +140,7 @@ MAA now attempts to read the `bluestacks.conf` storage location from the registr
 
 3. **First close** MAA, **then** open `gui.new.json`, find your current configuration name (viewable in Settings-Switch Configuration, default is `Default`), locate the `Gui.ConnectSettings.Extras.BluestacksExtra.ConfigPath` field, and enter the full path to `bluestacks.conf`. (Note: use escaped backslashes `\\`)
 
-::: details Example
+::: details Example  
 For `C:\ProgramData\BlueStacks_nxt\bluestacks.conf`:
 
 ```json
@@ -175,8 +175,8 @@ For specific differences, see the [source code](https://github.com/MaaAssistantA
 
 ### MuMu Screenshot Enhanced Mode
 
-::: tip
-The screenshot and touch enhancements described here apply to MuMu for Windows x64.
+::: tip  
+The screenshot and touch enhancements described here apply to MuMu for Windows x64.  
 :::
 
 **Version Requirement**: Official/Arknights-specific MuMu V4.1.26 or above, or Global MuMu V5.21.3 or above. <!-- Official V3.8.13 supports initial enhanced screenshots -->
@@ -209,6 +209,20 @@ AVD Screenshot Enhanced Mode is implemented in MaaFramework. Touch mode must be 
 
 2. For `Touch Mode`, select `MaaFwAdb`.
 
+### ModAVD Screenshot Enhanced Mode
+
+For the [ModAVD](https://github.com/ModAVD/ModAVD) emulator. MAA reads the emulator screen directly through the `modavd_extras` library that ModAVD provides, without going through ADB. For touch, choose `ModAVD Touch`, which uses the same library to touch from the emulator side, or MaaTouch.
+
+1. In `Settings` - `Connection` - `Connection Preset`, select `ModAVD`, or use `Auto detect connection` to detect a running ModAVD instance.
+
+2. Set `ModAVD root` to the ModAVD root folder (the folder that contains `ModAVD.exe`), or click `Select` to browse for it. The folder must contain `extras\modavd_extras.dll`. ModAVD release packages include it since 0.39.0; for an older version, update ModAVD first, or download `modavd_extras.dll` from the [ModAVDExtras releases](https://github.com/ModAVD/ModAVDExtras/releases) and put it in the `extras` folder there.
+
+3. Set `Connection address` to `127.0.0.1:<ADB port>` of the instance, where the ADB port is the console port + 1. With the default ports, instance 0 is `127.0.0.1:20001` and each following instance adds 10 (`127.0.0.1:20011`, `127.0.0.1:20021`, ...). `emulator-<console port>` also works. No instance number is needed. For `ADB path`, you can use `sdk\platform-tools\adb.exe` under the ModAVD root.
+
+4. For `Touch Mode`, select `ModAVD Touch` or `MaaTouch`. ModAVD runs SELinux in `Enforcing` mode, so the default Minitouch does not work.
+
+If `ModAVD root` is left empty, MAA takes screenshots through ADB only.
+
 ## Touch Mode
 
 1. [Minitouch](https://github.com/DeviceFarmer/minitouch): An Android touch event handler written in C that operates on `evdev` devices and provides a Socket interface for external programs to trigger touch events and gestures. Starting with Android 10, Minitouch is no longer available when SELinux is in `Enforcing` mode.<sup>[source](https://github.com/DeviceFarmer/minitouch?tab=readme-ov-file#for-android-10-and-up)</sup> (Default)
@@ -216,6 +230,7 @@ AVD Screenshot Enhanced Mode is implemented in MaaFramework. Touch mode must be 
 3. ADB Input: Directly calls ADB to use Android's `input` command for touch operations. Only for physical devices running an older OS version; do not use it if other modes work. ADB Input swipes tend to drift — to avoid this, swipe speed is set very slow and swipe distances differ from other modes, so it cannot be used in scenarios requiring precise coordinate control. (Deprecated)
 4. [MaaFwAdb](https://maafw.com/): Delegates screenshot and touch commands to MaaFramework's control unit. Extra swipe is not supported: an extra swipe is a short "brake" swipe appended perpendicular to the end of the main swipe (tracing an L-shaped 90° turn), used to counteract list inertia, so pages that rely on it to prevent overshooting will overshoot in this mode. (Experimental)
 5. MuMu Touch Enhancement: Calls the touch interface of MuMu's external renderer process. Only appears in the touch mode dropdown after `Enable MuMu's screenshot enhancement mode` is checked, and automatically falls back to Minitouch when unavailable (experimental). Requires the official MuMu V6.3.2 or above; the Arknights-specific and Global editions are not supported yet. Supports operation in the MuMu "App Keep-Alive" (background keep-alive) scenario.
+6. ModAVD Touch: Sends touches through the emulator console to the emulator's own virtual touch screen, using the `modavd_extras` library that comes with ModAVD, so nothing like MaaTouch runs in the guest. Only for the `ModAVD` connection config; falls back to MaaTouch when the library does not support it or is unavailable (experimental).
 
 ## ADB Lite
 
@@ -225,8 +240,8 @@ We recommend enabling it, but specific pros and cons need feedback. ~~Help us te
 
 ## Running multiple MAA and emulator instances
 
-::: info How to do it
-To operate multiple emulators simultaneously, copy the MAA folder multiple times and use **different MAA instances**, **the same adb.exe**, and **different connection addresses** to connect.
+::: info How to do it  
+To operate multiple emulators simultaneously, copy the MAA folder multiple times and use **different MAA instances**, **the same adb.exe**, and **different connection addresses** to connect.  
 :::
 
 ### Auto-starting multiple emulator instances
@@ -240,8 +255,8 @@ Using [BlueStacks International](./device/windows.md) as an example, here are tw
 3. In the new `Command line` column, find the content after `...\Bluestacks_nxt\HD-Player.exe"`.
 4. Add the content you found (similar to `--instance Nougat32`) to `Startup Settings` - `Additional Commands`.
 
-::: note
-After finishing, we recommend hiding the `Command line` column opened in `Step 2` to prevent slowdowns
+::: note  
+After finishing, we recommend hiding the `Command line` column opened in `Step 2` to prevent slowdowns  
 :::
 
 ::: details Example
@@ -255,7 +270,7 @@ Emulator Path: C:\Program Files\BlueStacks_nxt\HD-Player.exe
 Additional Commands: --instance Nougat32_1 --cmd launchApp --package "com.hypergryph.arknights.bilibili"
 ```
 
-The `--cmd launchApp --package` part auto-launches the specified package after startup; modify as needed.
+The `--cmd launchApp --package` part auto-launches the specified package after startup; modify as needed.  
 :::
 
 #### Start via emulator shortcuts
