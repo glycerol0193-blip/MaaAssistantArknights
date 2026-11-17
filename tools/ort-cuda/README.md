@@ -25,3 +25,15 @@ python tools/maa_core_eval.py --mode ocr --gpu-device 0 --dll-dir <isolated-cuda
 This uses the existing Debug image evaluator without connecting to a device or executing game actions. `--gpu-device` configures inference before loading resources. With the default build, the same argument retains the existing GPU provider selection.
 
 CUDA 实验构建只接受数字设备序号，不把 DXGI/LUID 当作 CUDA 序号。当前 WPF 的 LUID 选择路径尚未接入此实验选项。上面的离线测试不连接设备、不执行游戏操作。
+
+## Recognition session cache
+
+Build with `-DWITH_ORT_CUDA=ON`, select a numeric CUDA ordinal as above, and
+set `MAA_OCR_SHAPE_CACHE=1` before starting Maa. Unset the variable or set it
+to `0` to use the original recognition session.
+
+Each ORT CUDA recognizer keeps up to four recently used sessions keyed by input
+tensor shapes and data types. Detection, preprocessing, and batching use the
+existing path. Cache misses create a session and increase first-use latency.
+Additional sessions can also increase VRAM usage. The cache is opt-in for
+both Release and Debug builds.

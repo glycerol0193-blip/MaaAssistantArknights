@@ -12,6 +12,9 @@
 #include "Config/WebGpuDevice.h"
 #include "MaaUtils/NoWarningCV.hpp"
 MAA_SUPPRESS_CV_WARNINGS_BEGIN
+#ifdef ASST_ORT_CUDA_OCR
+#include "CudaShapeCachedRecognizer.h"
+#endif
 #include "fastdeploy/vision/ocr/ppocr/dbdetector.h"
 #include "fastdeploy/vision/ocr/ppocr/ppocr_v6.h"
 #include "fastdeploy/vision/ocr/ppocr/recognizer.h"
@@ -281,7 +284,7 @@ bool OcrPack::create_pipeline(bool force_cpu)
         }
         else
 #endif
-        if (backend == InferenceBackend::WebGPU) {
+            if (backend == InferenceBackend::WebGPU) {
             if (!device_id) {
                 Log.error(__FUNCTION__, "| failed to resolve the configured WebGPU device, falling back to CPU");
             }
@@ -352,7 +355,12 @@ bool OcrPack::create_pipeline(bool force_cpu)
             m_impl->det->GetPostprocessor().SetDetDBMaxCandidates(3000);
         }
 
-        m_impl->rec = std::make_unique<fastdeploy::vision::ocr::Recognizer>(
+#ifdef ASST_ORT_CUDA_OCR
+        using OcrRecognizer = maa_ocr::CudaShapeCachedRecognizer;
+#else
+        using OcrRecognizer = fastdeploy::vision::ocr::Recognizer;
+#endif
+        m_impl->rec = std::make_unique<OcrRecognizer>(
             platform::path_to_utf8_string(m_impl->rec_model_path),
             std::string(),
             platform::path_to_utf8_string(m_impl->rec_label_path),
